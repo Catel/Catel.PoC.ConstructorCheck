@@ -3,6 +3,11 @@
     public class ModelWithCheck : IModel
     {
         private bool _finishedConstructor = false;
+
+        // Note: when the next line is commented, it fails. Not sure why, is it because
+        // the _finishedConstructor is not set fast enough?
+        private bool _firstCall = true;
+
         private string _value;
 
         public ModelWithCheck()
@@ -16,67 +21,57 @@
             {
                 if (!_finishedConstructor)
                 {
-                    lock (this)
+                    // We can skip the first few frames, because they are not relevant
+                    var stackTrace = new System.Diagnostics.StackTrace(1, false);
+
+                    var finished = true;
+                    var thisType = GetType();
+
+                    for (var i = 0; i < stackTrace.FrameCount; i++)
                     {
-                        // Immediately check once received lock
-                        if (_finishedConstructor)
+                        var frame = stackTrace.GetFrame(i);
+                        if (frame is null)
                         {
-                            return true;
+                            continue;
                         }
 
-                        var stackTrace = new System.Diagnostics.StackTrace(true);
-
-                        var finished = true;
-                        var thisType = GetType();
-                        var lastBaseClass = thisType;
-
-                        // We can skip the first few frames, because they are not relevant
-                        for (var i = 1; i < stackTrace.FrameCount; i++)
+                        var methodInfo = frame.GetMethod();
+                        if (methodInfo is not null)
                         {
-                            var frame = stackTrace.GetFrame(i);
-                            if (frame is null)
+                            var declaringType = methodInfo.DeclaringType;
+                            if (declaringType is not null)
                             {
-                                continue;
-                            }
-
-                            var methodInfo = frame.GetMethod();
-                            if (methodInfo is not null)
-                            {
-                                var declaringType = methodInfo.DeclaringType;
-                                if (declaringType is not null)
+                                if (declaringType == thisType)
                                 {
-                                    if (declaringType == thisType)
-                                    {
-                                        if (methodInfo.IsConstructor)
-                                        {
-                                            finished = false;
-                                            break;
-                                        }
-
-                                        continue;
-                                    }
-
-                                    if (!declaringType.IsAssignableFrom(typeof(ModelWithCheck)))
-                                    {
-                                        // Left the type, finished constructor
-                                        break;
-                                    }
-
                                     if (methodInfo.IsConstructor)
                                     {
                                         finished = false;
                                         break;
                                     }
+
+                                    continue;
+                                }
+
+                                if (!declaringType.IsAssignableFrom(typeof(ModelWithCheck)))
+                                {
+                                    // Left the type, finished constructor
+                                    break;
+                                }
+
+                                if (methodInfo.IsConstructor)
+                                {
+                                    finished = false;
+                                    break;
                                 }
                             }
                         }
+                    }
 
-                        if (finished)
-                        {
-                            FirstValidStackTrace = stackTrace.ToString();
+                    if (finished)
+                    {
+                        FirstValidStackTrace = stackTrace.ToString();
 
-                            _finishedConstructor = true;
-                        }
+                        _finishedConstructor = true;
                     }
                 }
 

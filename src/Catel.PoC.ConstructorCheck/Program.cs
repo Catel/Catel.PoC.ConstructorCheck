@@ -14,13 +14,13 @@
             {
                 //Console.WriteLine($"{i + 1}");
 
-                //var testParentClass = new TestParentClass();
-                //if (testParentClass.Model.ChangeCount != 1)
-                //{
-                //    LogException(testParentClass.Model,
-                //        $"Test parent test: Unexpected change count of {testParentClass.Model.ChangeCount}, i = {i}",
-                //        testParentClass.Model.FirstValidStackTrace);
-                //}
+                var testParentClass = new TestParentClass();
+                if (testParentClass.Model.ChangeCount != 1)
+                {
+                    LogException(testParentClass.Model,
+                        $"Test parent test: Unexpected change count of {testParentClass.Model.ChangeCount}, i = {i}",
+                        testParentClass.Model.FirstValidStackTrace);
+                }
 
                 var testClass1 = new ModelWithCheck();
                 if (testClass1.ChangeCount != 0)
@@ -47,7 +47,11 @@
                 }
             }
 
+            Console.WriteLine("Test succeeded, press any key");
+            Console.ReadKey();
+
             var summary1 = BenchmarkRunner.Run<Check_vs_WithoutCheck_Single>();
+
             var summary2 = BenchmarkRunner.Run<Check_vs_WithoutCheck_Multiple>();
         }
 
@@ -64,8 +68,12 @@
     {
         public TestParentClass()
         {
-            Model = new ModelWithCheck();
-            Model.Value = "new value";
+            Model = new ModelWithCheck
+            {
+                Value = "new value"
+            };
+
+            //Model.Value = "new value";
         }
 
         public ModelWithCheck Model { get; private set; }
