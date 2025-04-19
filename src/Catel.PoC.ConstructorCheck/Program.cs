@@ -8,7 +8,7 @@
     {
         public static void Main(string[] args)
         {
-            const int TestCount = 1000000;
+            const int TestCount = 5000000;
 
             for (var i = 0; i < TestCount; i++)
             {

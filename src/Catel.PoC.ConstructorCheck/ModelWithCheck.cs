@@ -6,7 +6,9 @@
 
         // Note: when the next line is commented, it fails. Not sure why, is it because
         // the _finishedConstructor is not set fast enough?
-        private bool _firstCall = true;
+        //private bool _firstCall = true;
+
+        private int _timesIsConstructorFinishedCalled = 0;
 
         private string _value;
 
@@ -19,6 +21,8 @@
         {
             get
             {
+                _timesIsConstructorFinishedCalled++;
+
                 if (!_finishedConstructor)
                 {
                     // We can skip the first few frames, because they are not relevant
@@ -69,7 +73,7 @@
 
                     if (finished)
                     {
-                        FirstValidStackTrace = stackTrace.ToString();
+                        FirstValidStackTrace = $"{stackTrace} | {_timesIsConstructorFinishedCalled}";
 
                         _finishedConstructor = true;
                     }
