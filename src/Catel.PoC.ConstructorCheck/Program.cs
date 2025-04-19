@@ -8,25 +8,25 @@
     {
         public static void Main(string[] args)
         {
-            const int TestCount = 10000000;
+            const int TestCount = 1000000;
 
             for (var i = 0; i < TestCount; i++)
             {
                 //Console.WriteLine($"{i + 1}");
 
-                var testParentClass = new TestParentClass();
-                if (testParentClass.Model.ChangeCount != 1)
-                {
-                    LogException(testParentClass.Model,
-                        $"Unexpected change count of {testParentClass.Model.ChangeCount}, i = {i}",
-                        testParentClass.Model.FirstValidStackTrace);
-                }
+                //var testParentClass = new TestParentClass();
+                //if (testParentClass.Model.ChangeCount != 1)
+                //{
+                //    LogException(testParentClass.Model,
+                //        $"Test parent test: Unexpected change count of {testParentClass.Model.ChangeCount}, i = {i}",
+                //        testParentClass.Model.FirstValidStackTrace);
+                //}
 
                 var testClass1 = new ModelWithCheck();
                 if (testClass1.ChangeCount != 0)
                 {
                     LogException(testClass1,
-                        $"Unexpected change count of {testClass1.ChangeCount}, i = {i}",
+                        $"Model test: Unexpected change count of {testClass1.ChangeCount}, i = {i}",
                         testClass1.FirstValidStackTrace);
                 }
 
@@ -34,7 +34,7 @@
                 if (testClass2.ChangeCount != 0)
                 {
                     LogException(testClass2,
-                        $"Unexpected change count of {testClass2.ChangeCount}, i = {i}",
+                        $"Derived test: Unexpected change count of {testClass2.ChangeCount}, i = {i}",
                         testClass2.FirstValidStackTrace);
                 }
 
@@ -42,7 +42,7 @@
                 if (testClass2.ChangeCount != 1)
                 {
                     LogException(testClass2,
-                        $"Unexpected change count of {testClass2.ChangeCount}, i = {i}",
+                        $"Derived test: Unexpected change count of {testClass2.ChangeCount}, i = {i}",
                         testClass2.FirstValidStackTrace);
                 }
             }

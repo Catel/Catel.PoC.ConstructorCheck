@@ -10,7 +10,7 @@
             Value = "initial value";
         }
 
-        private bool IsRunningInConstructor
+        private bool IsConstructorFinished
         {
             get
             {
@@ -80,7 +80,7 @@
                     }
                 }
 
-                return !_finishedConstructor;
+                return _finishedConstructor;
             }
         }
 
@@ -95,7 +95,7 @@
             {
                 _value = value;
 
-                if (!IsRunningInConstructor)
+                if (IsConstructorFinished)
                 {
                     OnValueChanged();
                 }
