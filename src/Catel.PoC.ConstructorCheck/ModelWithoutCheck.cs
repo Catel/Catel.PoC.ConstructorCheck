@@ -24,7 +24,10 @@
 
         private void OnValueChanged()
         {
-            ChangeCount++;
+            lock (this)
+            {
+                ChangeCount++;
+            }
         }
     }
 }

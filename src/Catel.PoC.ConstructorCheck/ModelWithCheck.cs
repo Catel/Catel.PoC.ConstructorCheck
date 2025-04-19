@@ -16,62 +16,75 @@
             {
                 if (!_finishedConstructor)
                 {
-                    var stackTrace = new System.Diagnostics.StackTrace(true);
-
-                    var finished = true;
-                    var thisType = GetType();
-                    var lastBaseClass = thisType;
-
-                    // We can skip the first few frames, because they are not relevant
-                    for (var i = 1; i < stackTrace.FrameCount; i++)
+                    lock (this)
                     {
-                        var frame = stackTrace.GetFrame(i);
-                        if (frame is null)
+                        // Immediately check once received lock
+                        if (_finishedConstructor)
                         {
-                            continue;
+                            return true;
                         }
 
-                        var methodInfo = frame.GetMethod();
-                        if (methodInfo is not null)
+                        var stackTrace = new System.Diagnostics.StackTrace(true);
+
+                        var finished = true;
+                        var thisType = GetType();
+                        var lastBaseClass = thisType;
+
+                        // We can skip the first few frames, because they are not relevant
+                        for (var i = 1; i < stackTrace.FrameCount; i++)
                         {
-                            var declaringType = methodInfo.DeclaringType;
-                            if (declaringType is not null)
+                            var frame = stackTrace.GetFrame(i);
+                            if (frame is null)
                             {
-                                if (declaringType == thisType)
+                                continue;
+                            }
+
+                            var methodInfo = frame.GetMethod();
+                            if (methodInfo is not null)
+                            {
+                                var declaringType = methodInfo.DeclaringType;
+                                if (declaringType is not null)
                                 {
+                                    if (declaringType == thisType)
+                                    {
+                                        if (methodInfo.IsConstructor)
+                                        {
+                                            finished = false;
+                                            break;
+                                        }
+
+                                        continue;
+                                    }
+
+                                    if (!declaringType.IsAssignableFrom(typeof(ModelWithCheck)))
+                                    {
+                                        // Left the type, finished constructor
+                                        break;
+                                    }
+
                                     if (methodInfo.IsConstructor)
                                     {
                                         finished = false;
                                         break;
                                     }
-
-                                    continue;
-                                }
-
-                                if (!declaringType.IsAssignableFrom(typeof(ModelWithCheck)))
-                                {
-                                    // Left the type, finished constructor
-                                    break;
-                                }
-
-                                if (methodInfo.IsConstructor)
-                                {
-                                    finished = false;
-                                    break;
                                 }
                             }
                         }
-                    }
 
-                    if (finished)
-                    {
-                        _finishedConstructor = true;
+                        if (finished)
+                        {
+                            FirstValidStackTrace = stackTrace.ToString();
+
+                            _finishedConstructor = true;
+                        }
                     }
                 }
 
                 return !_finishedConstructor;
             }
         }
+
+        public string FirstValidStackTrace { get; private set; }
 
         public int ChangeCount { get; set; }
 
@@ -91,7 +104,10 @@
 
         private void OnValueChanged()
         {
-            ChangeCount++;
+            lock (this)
+            {
+                ChangeCount++;
+            }
         }
     }
 }

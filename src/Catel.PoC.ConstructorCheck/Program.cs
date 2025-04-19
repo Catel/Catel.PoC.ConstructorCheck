@@ -8,38 +8,55 @@
     {
         public static void Main(string[] args)
         {
-
             const int TestCount = 10000000;
 
             for (var i = 0; i < TestCount; i++)
-            {           
+            {
+                //Console.WriteLine($"{i + 1}");
+
                 var testParentClass = new TestParentClass();
                 if (testParentClass.Model.ChangeCount != 1)
                 {
-                    throw new Exception($"Unexpected change count of {testParentClass.Model.ChangeCount}, i = {i}");
+                    LogException(testParentClass.Model,
+                        $"Unexpected change count of {testParentClass.Model.ChangeCount}, i = {i}",
+                        testParentClass.Model.FirstValidStackTrace);
                 }
 
                 var testClass1 = new ModelWithCheck();
                 if (testClass1.ChangeCount != 0)
                 {
-                    throw new Exception($"Unexpected change count of {testClass1.ChangeCount}, i = {i}");
+                    LogException(testClass1,
+                        $"Unexpected change count of {testClass1.ChangeCount}, i = {i}",
+                        testClass1.FirstValidStackTrace);
                 }
 
                 var testClass2 = new TestDerivedClass();
                 if (testClass2.ChangeCount != 0)
                 {
-                    throw new Exception($"Unexpected change count of {testClass2.ChangeCount}, i = {i}");
+                    LogException(testClass2,
+                        $"Unexpected change count of {testClass2.ChangeCount}, i = {i}",
+                        testClass2.FirstValidStackTrace);
                 }
 
                 testClass2.Value = "new value";
                 if (testClass2.ChangeCount != 1)
                 {
-                    throw new Exception($"Unexpected change count of {testClass2.ChangeCount}, i = {i}");
+                    LogException(testClass2,
+                        $"Unexpected change count of {testClass2.ChangeCount}, i = {i}",
+                        testClass2.FirstValidStackTrace);
                 }
             }
 
             var summary1 = BenchmarkRunner.Run<Check_vs_WithoutCheck_Single>();
             var summary2 = BenchmarkRunner.Run<Check_vs_WithoutCheck_Multiple>();
+        }
+
+        private static void LogException(IModel model, string message, string stackTrace)
+        {
+            Console.WriteLine(message);
+            Console.WriteLine(stackTrace);
+
+            //throw new Exception(message);
         }
     }
 
