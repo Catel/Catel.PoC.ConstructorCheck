@@ -6,7 +6,11 @@
 
         // Note: when the next line is commented, it fails. Not sure why, is it because
         // the _finishedConstructor is not set fast enough?
-        //private bool _firstCall = true;
+        //
+        // .net 8 seems to need only 1 additional field
+        // .net 9 seems to need 2 additional fields
+        private bool _dummyValue1 = true;
+        //private bool _dummyValue2 = true;
 
         private int _timesIsConstructorFinishedCalled = 0;
 
